@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FORGE — Roblox Studio Replica</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;user-select:none}
+html,body{height:100%;overflow:hidden;background:#1e1e26;color:#d5d5dc;font:12px 'Segoe UI',Arial,Helvetica,sans-serif}
+#app{display:grid;grid-template-rows:30px 24px 96px minmax(0,1fr) 200px 22px;height:100%}
+#titlebar{grid-row:1;background:#16161d;display:flex;align-items:center;padding:0 10px;gap:10px;border-bottom:1px solid #000}
+#titlebar .logo{width:18px;height:18px;background:#00a2ff;border-radius:4px;display:flex;align-items:center;justify-content:center;font-weight:bold;color:#fff;font-size:11px}
+#titlebar .t{font-weight:600;color:#cfcfda}
+#titlebar .win{margin-left:auto;display:flex;gap:6px}
+#titlebar .win span{width:12px;height:12px;border-radius:2px;background:#3a3a46;display:inline-block}
+#titlebar .win span.x{background:#e5484d}
+#menubar{grid-row:2;background:#23232d;display:flex;align-items:center;border-bottom:1px solid #000;position:relative;z-index:60}
+#menubar .mi{padding:3px 10px;cursor:default}
+#menubar .mi:hover,#menubar .mi.open{background:#35354a}
+.dropdown{position:absolute;top:24px;background:#2b2b38;border:1px solid #4a4a5c;box-shadow:0 6px 18px rgba(0,0,0,.6);min-width:210px;z-index:100}
+.dropdown .it{padding:5px 14px;display:flex;justify-content:space-between;cursor:default;white-space:nowrap}
+.dropdown .it:hover{background:#00a2ff;color:#fff}
+.dropdown .it .sc{color:#8a8a99;margin-left:24px}
+.dropdown .it:hover .sc{color:#dfeaff}
+.dropdown .sep{height:1px;background:#4a4a5c;margin:3px 8px}
+#ribbon{grid-row:3;background:#262631;border-bottom:1px solid #000;display:flex;flex-direction:column;min-height:0}
+#tabs{display:flex;background:#1d1d26}
+#tabs .tab{padding:4px 16px;cursor:default;font-weight:600;color:#9a9aa8}
+#tabs .tab.active{background:#262631;color:#fff;border-bottom:2px solid #00a2ff}
+#ribbonbtns{flex:1;display:flex;align-items:flex-start;gap:2px;padding:4px 8px;overflow-x:auto;min-height:0}
+.rbtn{width:62px;height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:4px;cursor:default;border:1px solid transparent;flex:none}
+.rbtn .ic{font-size:17px;line-height:1;color:#8fd4ff}
+.rbtn .lb{font-size:10px;color:#b9b9c6;text-align:center;line-height:1.1}
+.rbtn:hover{background:#33334a;border-color:#4a4a66}
+.rbtn.on{background:#0d3a55;border-color:#00a2ff}
+.rbtn.on .lb{color:#fff}
+.rsep{width:1px;background:#3a3a46;margin:6px 6px;align-self:stretch;flex:none}
+#main{grid-row:4;display:grid;grid-template-columns:225px minmax(0,1fr) 265px;min-height:0;min-width:0}
+.panel{background:#26262f;border-right:1px solid #000;overflow:auto;min-height:0;min-width:0}
+.panel:last-child{border-left:1px solid #000;border-right:none}
+.panel h3{font-size:11px;font-weight:600;color:#8a8a99;padding:6px 10px;border-bottom:1px solid #3a3a46;position:sticky;top:0;background:#26262f;z-index:5}
+.hidden{display:none!important}
+#vpwrap{position:relative;min-width:0;min-height:0;overflow:hidden}
+#vp{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:default}
+#dock{grid-row:5;display:grid;grid-template-rows:1fr 24px;background:#23232b;border-top:1px solid #000;min-height:0}
+#output{overflow-y:auto;font:11px Consolas,monospace;padding:4px 8px;user-select:text;min-height:0}
+#output .ln{white-space:pre-wrap;color:#b9e38f}
+#output .ln.err{color:#ff7a7a}
+#output .ln.sys{color:#7ab8ff}
+#output .ln.warn{color:#ffd27a}
+#cmdbar{display:flex;align-items:center;background:#2b2b36;border-top:1px solid #000}
+#cmdbar .pfx{color:#8fd4ff;padding:0 6px;font:12px Consolas,monospace}
+#cmd{flex:1;background:transparent;border:none;outline:none;color:#d5d5dc;font:12px Consolas,monospace;user-select:text}
+.tree{min-height:0}
+.tree .node{padding:2px 4px 2px 8px;display:flex;align-items:center;gap:5px;cursor:default;white-space:nowrap}
+.tree .node:hover{background:#30303e}
+.tree .node.sel{background:#0d3a55;outline:1px solid #00a2ff}
+.tree .node .arrow{width:10px;text-align:center;color:#8a8a99;font-size:9px}
+.tree .node .ic{width:12px;height:12px;border-radius:2px;flex:none}
+.tree .kids{margin-left:14px;border-left:1px dotted #3a3a46}
+.tree .node input{background:#111;border:1px solid #00a2ff;color:#fff;font:12px inherit;width:120px}
+#props table{width:100%;border-collapse:collapse}
+#props td{padding:3px 6px;vertical-align:middle}
+#props td.k{color:#9a9aa8;width:44%;white-space:nowrap}
+#props input[type=text],#props input[type=number],#props select{width:100%;background:#1a1a22;border:1px solid #3a3a46;color:#d5d5dc;padding:2px 4px;font:11px inherit;user-select:text}
+#props input:focus,#props select:focus{border-color:#00a2ff}
+#props .xyz{display:flex;gap:3px}
+#props .xyz input{width:33%}
+#props input[type=color]{width:100%;height:22px;background:none;border:1px solid #3a3a46;padding:0}
+#props input[type=checkbox]{accent-color:#00a2ff}
+#props .sect{background:#2e2e3a;color:#8fd4ff;font-weight:600;font-size:10px;padding:2px 6px}
+#statusbar{grid-row:6;background:#16161d;display:flex;align-items:center;gap:18px;padding:0 10px;color:#8a8a99;font-size:11px;white-space:nowrap;overflow:hidden}
+#statusbar .grow{flex:1}
+#toolbox{position:absolute;right:8px;top:8px;width:170px;background:#26262fd9;border:1px solid #4a4a5c;border-radius:4px;z-index:20;backdrop-filter:blur(2px)}
+#toolbox h4{font-size:11px;padding:5px 8px;color:#8fd4ff;border-bottom:1px solid #3a3a46}
+#toolbox .ti{padding:4px 8px;cursor:default}
+#toolbox .ti:hover{background:#0d3a55}
+#overlay{position:fixed;inset:0;background:#000a;display:none;align-items:center;justify-content:center;z-index:200}
+#overlay.show{display:flex}
+#modal{background:#26262f;border:1px solid #4a4a5c;border-radius:6px;min-width:420px;max-width:80vw;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 10px 40px #000}
+#modal .mh{display:flex;align-items:center;padding:6px 10px;border-bottom:1px solid #3a3a46;gap:8px}
+#modal .mh input{flex:1;background:#1a1a22;border:1px solid #3a3a46;color:#fff;padding:3px 6px;font:12px inherit;user-select:text}
+#modal .mb{padding:8px;display:flex;gap:8px;justify-content:flex-end;border-top:1px solid #3a3a46}
+#modal textarea{width:640px;max-width:70vw;height:300px;background:#14141b;color:#d5e8ff;border:1px solid #3a3a46;font:12px Consolas,monospace;padding:8px;user-select:text;resize:both}
+button{background:#35354a;border:1px solid #4a4a5c;color:#d5d5dc;padding:4px 12px;border-radius:3px;cursor:default;font:12px inherit}
+button:hover{background:#43435e}
+button.blue{background:#0d5a8a;border-color:#1a8ad0}
+button.blue:hover{background:#1270ae}
+#ctx{position:fixed;background:#2b2b38;border:1px solid #4a4a5c;box-shadow:0 6px 18px rgba(0,0,0,.6);z-index:300;display:none;min-width:160px}
+#ctx .it{padding:5px 14px;cursor:default}
+#ctx .it:hover{background:#00a2ff;color:#fff}
+#ctx .sep{height:1px;background:#4a4a5c;margin:3px 8px}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:#3a3a46;border-radius:5px}
+::-webkit-scrollbar-track{background:#1d1d26}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="titlebar"><div class="logo">F</div><span class="t">FORGE — Place1 (Roblox Studio Replica)</span><div class="win"><span></span><span></span><span class="x"></span></div></div>
+  <div id="menubar"></div>
+  <div id="ribbon"><div id="tabs"></div><div id="ribbonbtns"></div></div>
+  <div id="main">
+    <div class="panel" id="explorer"><h3>Explorer</h3><div class="tree" id="tree"></div></div>
+    <div id="vpwrap"><canvas id="vp"></canvas>
+      <div id="toolbox" class="hidden"><h4>Toolbox</h4><div id="toolboxitems"></div></div>
+    </div>
+    <div class="panel" id="propspanel"><h3>Properties</h3><div id="props"></div></div>
+  </div>
+  <div id="dock"><div id="output"></div><div id="cmdbar"><span class="pfx">&gt;</span><input id="cmd" placeholder="type a command (help)" autocomplete="off"></div></div>
+  <div id="statusbar"><span id="st-tool">Tool: Select</span><span id="st-count"></span><span id="st-sel">Nothing selected</span><span class="grow"></span><span id="st-cam"></span><span id="st-save">Saved</span></div>
+</div>
+<div id="ctx"></div>
+<div id="overlay"><div id="modal"></div></div>
+<script>
+(function(){
+var V='v15';
+var bases=['','https://cdn.jsdelivr.net/gh/trevordavindra-cyber/forge-site@main/'];
+var files=['forge_core.js','forge_mid.js','forge_end.js','forge_mobile.js','forge_safe.js','forge_script.js','forge_world.js','forge_build.js','forge_ai.js','forge_toolbox.js','forge_ui2.js','forge_plug.js','forge_export.js','forge_fit2.js'];
+function fetchText(url){return fetch(url).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.text();});}
+Promise.all(files.map(function(f){
+ return fetchText(bases[0]+f+'?v='+V).catch(function(){return fetchText(bases[1]+f);});
+})).then(function(parts){
+ (0,eval)(parts.join('\n'));
+}).catch(function(e){
+ var o=document.getElementById('output');
+ if(o){var d=document.createElement('div');d.style.color='#ff7a7a';d.textContent='Could not load Forge core: '+e;o.appendChild(d);}
+});
+})();
+</script>
+</body>
+</html>
