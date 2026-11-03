@@ -31,7 +31,7 @@ function lightPanel(el){
   var s3=document.createElement('div');s3.className='sect';s3.textContent='Atmosphere';el.appendChild(s3);
   var fg=document.createElement('input');fg.type='range';fg.min='0';fg.max='0.9';fg.step='0.05';fg.value=LIGHT.fog;fg.style.width='100%';
   fg.onchange=function(){LIGHT.fog=+fg.value;saveLight();render();};lrow('Fog',fg);
-  var note=document.createElement('div');note.style.cssText='padding:8px 6px;color:#6a6a7a;font-size:10px';note.textContent='Preview lighting in this viewport. Clock, brightness and fog apply live.';el.appendChild(note;}
+  var note=document.createElement('div');note.style.cssText='padding:8px 6px;color:#6a6a7a;font-size:10px';note.textContent='Preview lighting in this viewport. Clock, brightness and fog apply live.';el.appendChild(note);}
 buildProps=function(){var p=SEL?DOC.nodes[SEL]:null;var el=document.getElementById('props');
  if((p&&p.cls==='Lighting')||(SEL==='Lighting')){document.getElementById('st-sel').textContent='Lighting (Lighting)';lightPanel(el);return;}
  if(!p&&SEL&&typeof SERVICES!=='undefined'&&SERVICES.indexOf(SEL)>=0){el.innerHTML='<div style="padding:10px;color:#6a6a7a">'+SEL+' ('+SEL+') — no editable properties</div>';document.getElementById('st-sel').textContent=SEL+' ('+SEL+')';return;}
